@@ -92,3 +92,33 @@ TEST(WideVaneRealFrames, NTXWMT18A112AA) {
         EXPECT_STREQ(HeatPumpProtocol::decode_wide_vane(f.data[10]), f.wide_vane);
     }
 }
+
+TEST(WideVaneEncode, AirflowControlSendsVaneAutoAndHighBit) {
+    // Matches the remote: i-See airflow needs vertical AUTO and wide 0x80 in one packet.
+    for (bool wide_adjust : {false, true}) {
+        wantedHeatpumpSettings wanted{};
+        heatpumpSettings current{};
+        current.iSee = true;
+        current.wideVane = WIDEVANE_MAP[6];
+        wanted.wideVane = WIDEVANE_MAP[7];
+        wanted.vane = VANE_MAP[6];
+        uint8_t packet[22]{};
+        HeatPumpProtocol::encode_control(packet, wanted, current, false, false, wide_adjust, false);
+        EXPECT_EQ(packet[18], 0x80);
+        EXPECT_EQ(packet[12], VANE[0]);
+        EXPECT_EQ(packet[6] & CONTROL_PACKET_1[4], CONTROL_PACKET_1[4]);
+        EXPECT_EQ(packet[7], CONTROL_PACKET_2[0]);
+    }
+}
+
+TEST(WideVaneEncode, AirflowControlWithoutISeeKeepsVane) {
+    wantedHeatpumpSettings wanted{};
+    heatpumpSettings current{};
+    current.wideVane = WIDEVANE_MAP[6];
+    wanted.wideVane = WIDEVANE_MAP[7];
+    wanted.vane = VANE_MAP[6];
+    uint8_t packet[22]{};
+    HeatPumpProtocol::encode_control(packet, wanted, current, false, false, false, false);
+    EXPECT_EQ(packet[18], WIDEVANE[6]);
+    EXPECT_EQ(packet[12], VANE[6]);
+}

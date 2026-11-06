@@ -198,6 +198,13 @@ struct HeatPumpProtocol {
                 packet[18] = WIDEVANE[index] | (wide_adjust ? 0x80 : 0x00);
                 packet[7] |= CONTROL_PACKET_2[0];
                 if (split_horizontal) packet[16] = WIDEVANE[index];
+                // The unit enters i-See airflow only on 0x80 with the vertical vane on AUTO
+                // in the same packet, which is what the IR remote sends.
+                if (index == 7) {
+                    packet[18] = 0x80;
+                    packet[12] = VANE[0];
+                    packet[6] |= CONTROL_PACKET_1[4];
+                }
             }
         }
     }
