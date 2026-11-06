@@ -78,7 +78,7 @@ void CN105Climate::getRoomTemperatureFromResponsePacket() {
     auto receivedStatus = this->profile_->decode_room_status(this->data, this->currentStatus);
 
     // Byte 7 equals the room temperature while the i-See sensor is off and reads
-    // 0.5-2 °C lower while it is on. Byte 8 is 0xFE while i-See airflow is off
+    // 0.5-3 °C lower while it is on. Byte 8 is 0xFE while i-See airflow is off
     // and 0x01 or 0x02 while it is on. Measured on a Trane NTXWMT18A112AA (MSZ-FH).
     if (this->isee_temperature_sensor_ != nullptr && this->data[7] != 0) {
         const float isee_temp = (static_cast<int>(this->data[7]) - 128) / 2.0f;
