@@ -81,6 +81,8 @@ namespace esphome {
         void set_compressor_frequency_sensor(esphome::sensor::Sensor* compressor_frequency_sensor);
         void set_compressor_frequency_report_when_idle(bool value);
         void set_target_humidity_sensor(esphome::sensor::Sensor* target_humidity_sensor);
+        void set_isee_temperature_sensor(esphome::sensor::Sensor* sensor) { this->isee_temperature_sensor_ = sensor; }
+        void set_isee_status_sensor(esphome::sensor::Sensor* sensor) { this->isee_status_sensor_ = sensor; }
         void set_input_power_sensor(esphome::sensor::Sensor* input_power_sensor);
         void set_kwh_sensor(esphome::sensor::Sensor* kwh_sensor);
         void set_runtime_hours_sensor(esphome::sensor::Sensor* runtime_hours_sensor);
@@ -164,6 +166,8 @@ namespace esphome {
             nullptr;  // Sensor to store compressor frequency
         sensor::Sensor* target_humidity_sensor_ =
             nullptr;  // Sensor to expose target humidity from 0x02 settings packet (byte 12)
+        sensor::Sensor* isee_temperature_sensor_ = nullptr;  // 0x03 byte 7
+        sensor::Sensor* isee_status_sensor_ = nullptr;  // 0x03 byte 8
         sensor::Sensor* input_power_sensor_ =
             nullptr;  // Sensor to store compressor frequency
         sensor::Sensor* kwh_sensor_ =

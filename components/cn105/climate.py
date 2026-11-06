@@ -121,6 +121,8 @@ CONF_KWH_SENSOR = "kwh_sensor"
 CONF_RUNTIME_HOURS_SENSOR = "runtime_hours_sensor"
 CONF_OUTSIDE_AIR_TEMPERATURE_SENSOR = "outside_air_temperature_sensor"
 CONF_TARGET_HUMIDITY_SENSOR = "target_humidity_sensor"
+CONF_ISEE_TEMPERATURE_SENSOR = "isee_temperature_sensor"
+CONF_ISEE_STATUS_SENSOR = "isee_status_sensor"
 CONF_ISEE_SENSOR = "isee_sensor"
 CONF_FUNCTIONS_SENSOR = "functions_sensor"
 CONF_FUNCTIONS_BUTTON = "functions_get_button"
@@ -198,6 +200,8 @@ LOSSNAY_UNSUPPORTED_OPTIONS = {
     CONF_AUTO_SUB_MODE_SENSOR,
     CONF_REMOTE_TEMP_SOURCE,
     CONF_AIRFLOW_CONTROL_SELECT,
+    CONF_ISEE_TEMPERATURE_SENSOR,
+    CONF_ISEE_STATUS_SENSOR,
     CONF_AIR_PURIFIER_SWITCH,
     CONF_NIGHT_MODE_SWITCH,
     CONF_CIRCULATOR_SWITCH,
@@ -341,6 +345,16 @@ OUTSIDE_AIR_TEMPERATURE_SENSOR_SCHEMA = sensor.sensor_schema(
 ).extend({cv.GenerateID(CONF_ID): cv.declare_id(OutsideAirTemperatureSensor)})
 ISEE_SENSOR_SCHEMA = binary_sensor.binary_sensor_schema(ISeeSensor).extend(
     {cv.GenerateID(CONF_ID): cv.declare_id(ISeeSensor)}
+)
+ISEE_TEMPERATURE_SENSOR_SCHEMA = sensor.sensor_schema(
+    unit_of_measurement=UNIT_CELSIUS,
+    device_class=DEVICE_CLASS_TEMPERATURE,
+    state_class=STATE_CLASS_MEASUREMENT,
+    accuracy_decimals=1,
+)
+ISEE_STATUS_SENSOR_SCHEMA = sensor.sensor_schema(
+    accuracy_decimals=0,
+    entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
 )
 TARGET_HUMIDITY_SENSOR_SCHEMA = sensor.sensor_schema(
     TargetHumiditySensor,
@@ -528,6 +542,8 @@ CONFIG_SCHEMA = (
             ): OUTSIDE_AIR_TEMPERATURE_SENSOR_SCHEMA,
             cv.Optional(CONF_ISEE_SENSOR): ISEE_SENSOR_SCHEMA,
             cv.Optional(CONF_TARGET_HUMIDITY_SENSOR): TARGET_HUMIDITY_SENSOR_SCHEMA,
+            cv.Optional(CONF_ISEE_TEMPERATURE_SENSOR): ISEE_TEMPERATURE_SENSOR_SCHEMA,
+            cv.Optional(CONF_ISEE_STATUS_SENSOR): ISEE_STATUS_SENSOR_SCHEMA,
             cv.Optional(CONF_FUNCTIONS_SENSOR): FUNCTIONS_SENSOR_SCHEMA,
             cv.Optional(CONF_FUNCTIONS_BUTTON): FUNCTIONS_BUTTON_SCHEMA,
             cv.Optional(CONF_FUNCTIONS_SET_BUTTON): FUNCTIONS_BUTTON_SCHEMA,
@@ -793,6 +809,14 @@ def to_code(config):
             conf_item["force_update"] = False
         sensor_var = yield sensor.new_sensor(conf_item)
         cg.add(var.set_target_humidity_sensor(sensor_var))
+
+    if CONF_ISEE_TEMPERATURE_SENSOR in config:
+        sensor_var = yield sensor.new_sensor(config[CONF_ISEE_TEMPERATURE_SENSOR])
+        cg.add(var.set_isee_temperature_sensor(sensor_var))
+
+    if CONF_ISEE_STATUS_SENSOR in config:
+        sensor_var = yield sensor.new_sensor(config[CONF_ISEE_STATUS_SENSOR])
+        cg.add(var.set_isee_status_sensor(sensor_var))
 
     if CONF_FUNCTIONS_SENSOR in config:
         tsensor_var = yield text_sensor.new_text_sensor(config[CONF_FUNCTIONS_SENSOR])
